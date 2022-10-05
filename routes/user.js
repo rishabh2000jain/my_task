@@ -14,13 +14,14 @@ userRoutes.post('/login',async function(req,res){
 
     if(email && password){
 
-        const user = await AuthModel.findOne({email:email},{_id:0,__v:0});
+        const user = await AuthModel.findOne({email:email});
 
         if(user){
 
             const isValidPassword = await bcrypt.compare(password,user.password);
 
             if(isValidPassword){
+
                 const token = await jwt.sign({id:user._id,email:user.email},process.env.JWTSECRATE);
 
                 const data = {
