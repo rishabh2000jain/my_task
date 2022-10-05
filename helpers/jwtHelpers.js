@@ -14,7 +14,6 @@ async function validateBearerToken(token){
 }
 
 async function decodeBearerToken(token){
-    console.log(token);
     return await Jwt.decode(token);
 }
 
