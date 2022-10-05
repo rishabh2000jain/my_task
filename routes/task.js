@@ -7,10 +7,21 @@ const taskRoutes = new express.Router();
 
 taskRoutes.get('/',async function(req,res){
     try{
+        const {pageSize=10,page=1} = req.query;
         const userData = await decodeBearerToken(getTokenFromRequest(req));
-        const tasks = await TaskModel.find({userId:userData.userId});
-        res.send(new ResponseModel({responseCode:200,data:tasks,message:'Successfully Retrive Tasks'}));
+        const tasks = await TaskModel.find({userId:userData.id}).skip(pageSize*(page-1)).limit(pageSize);
+        const count =await TaskModel.find({userId:userData.id}).count();
+        const responseData = {
+            'tasks':tasks,
+            'meta':{
+                'page':parseInt(page),
+                'count':count,
+                'totalPages':Math.max(1,count/pageSize)
+            }
+        };
+        res.send(new ResponseModel({responseCode:200,data:responseData,message:'Successfully Retrive Tasks'}));
     }catch(error){
+        console.log(error.message);
         res.send(new ErrorModel({responseCode:400,errorMessage:'Failed To Retrive Tasks'}));
     }
 });
@@ -42,7 +53,7 @@ taskRoutes.patch('/:id',async function(req,res){
         if(body.title === null ||body.title == ''){
             res.send(new ErrorModel({responseCode:400,errorMessage:'Task Title Can\'t Be Empty'}));
         }else{
-            req.body.date = Date.now();
+            req.body.date = Date.now;
             const updatedTask = await TaskModel.findByIdAndUpdate(documentId,req.body);
             res.send(new ResponseModel({responseCode:200,data:updatedTask,message:'Successfully Updated Task'}));
         }
@@ -52,5 +63,15 @@ taskRoutes.patch('/:id',async function(req,res){
     }
 });
 
+taskRoutes.delete('/:id',async function(req,res){
+    try{
+            const documentId = req.params.id;
+            req.body.date = Date.now;
+            const updatedTask = await TaskModel.findByIdAndDelete(documentId);
+            res.send(new ResponseModel({responseCode:200,data:updatedTask,message:'Successfully Deleted Task'}));        
+    }catch(error){
+        res.send(new ErrorModel({responseCode:400,errorMessage:error.message}));
+    }
+});
 
 export default taskRoutes;
