@@ -6,6 +6,7 @@ import path from 'path';
 import userRoutes from './routes/user.js'
 import authenticator  from './middlewares/checkAuth.middleware.js';
 import taskRoutes from './routes/task.js';
+import { cors } from './helpers/cors.js';
 
 dotenv.config();
 const __dirname = path.resolve();
@@ -25,10 +26,11 @@ const parser = bodyParser.urlencoded({extended:true});
 
 app.use(parser);
 app.use(bodyParser.json());
-app.use(express.static('./public'));
+app.use(express.static(__dirname+'/public'));
+
+app.use(cors);
 
 app.use('/task',authenticator);
-
 
 //apis
 app.use('/user',userRoutes);
