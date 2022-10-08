@@ -36,6 +36,9 @@ app.use('/task',authenticator);
 app.use('/user',userRoutes);
 app.use('/task',taskRoutes);
 
+app.get('/',function(req,res){
+    res.send('<h1>Oops invalud route 😅<h1>');
+});
 
 
 
